@@ -1,6 +1,6 @@
-import * as yup from 'yup';
-
+import { useEffect } from 'react';
 import { toast } from 'react-toastify';
+import * as yup from 'yup';
 import { Validacao } from '../../components/Validation';
 import { api } from '../../services/api';
 
@@ -40,9 +40,32 @@ export function Login() {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit =  async (data) => {
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('email');
+    const savedPassword = localStorage.getItem('password');
+    const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
 
-   const response = await toast.promise(
+    if (savedEmail && savedPassword && savedRememberMe) {
+      document.getElementById('email').value = savedEmail;
+      document.getElementById('password').value = savedPassword;
+      document.getElementById('remember').checked = true;
+    }
+  }, []);
+
+  const onSubmit = async (data) => {
+    const rememberMe = document.getElementById('remember').checked;
+
+    if (rememberMe) {
+      localStorage.setItem('email', data.email);
+      localStorage.setItem('password', data.password);
+      localStorage.setItem('rememberMe', 'true');
+    } else {
+      localStorage.removeItem('email');
+      localStorage.removeItem('password');
+      localStorage.removeItem('rememberMe');
+    }
+
+    const response = await toast.promise(
       api.post('/sessao', {
         email: data.email,
         senha_hash: data.password,
@@ -51,21 +74,24 @@ export function Login() {
         pending: 'Aguarde... ⏳',
         info: 'Realizando login... ⏳',
         warning: 'Verificando credenciais... ⏳',
-        success:{
-        render(){
-          setTimeout(() => {
-            window.location.href = '/home';
-          }, 2000);
-          return 'Login realizado com sucesso! ☑️';
+        success: {
+          render({ data }) {
+            const token = data?.data?.token; // Supondo que o token venha na resposta
+            if (token) {
+              localStorage.setItem('authToken', token); // Salva o token no localStorage
+            }
+            setTimeout(() => {
+              window.location.href = '/home';
+            }, 2000);
+            return 'Login realizado com sucesso! ☑️';
+          },
         },
         error: 'Email ou senha inválidos! ❌',
-      }}
-      
+      }
     );
 
     console.log(response);
-
-  }
+  };
 
   return (
     <Container>
@@ -74,7 +100,7 @@ export function Login() {
       <Form onSubmit={handleSubmit(onSubmit)}>
         <ImputContainer>
           <label htmlFor="email">Email:</label>
-          <input type="email" {...register('email')} />
+          <input id="email" type="email" {...register('email')} />
           <Validacao
             red={errors?.email?.message !== undefined ? 'true' : undefined}
           >
@@ -84,7 +110,7 @@ export function Login() {
 
         <ImputContainer>
           <label htmlFor="password">Senha:</label>
-          <input type="password" {...register('password')} />
+          <input id="password" type="password" {...register('password')} />
           <Validacao
             red={errors?.password?.message !== undefined ? 'true' : undefined}
           >
@@ -97,7 +123,7 @@ export function Login() {
             <input type="checkbox" id="remember" name="remember" />
             <label htmlFor="remember">Lembrar-me</label>
           </div>
-          <Link href="#">Esqueci minha senha</Link>
+          <Link to="/esqueci-senha">Esqueci minha senha</Link>
         </RememberMe>
 
         <Button type="submit">Entrar</Button>
