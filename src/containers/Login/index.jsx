@@ -1,6 +1,8 @@
 import * as yup from 'yup';
 
+import { toast } from 'react-toastify';
 import { Validacao } from '../../components/Validation';
+import { api } from '../../services/api';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
@@ -38,9 +40,32 @@ export function Login() {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data) => {
-    console.log(data);
-  };
+  const onSubmit =  async (data) => {
+
+   const response = await toast.promise(
+      api.post('/sessao', {
+        email: data.email,
+        senha_hash: data.password,
+      }),
+      {
+        pending: 'Aguarde... ⏳',
+        info: 'Realizando login... ⏳',
+        warning: 'Verificando credenciais... ⏳',
+        success:{
+        render(){
+          setTimeout(() => {
+            window.location.href = '/home';
+          }, 2000);
+          return 'Login realizado com sucesso! ☑️';
+        },
+        error: 'Email ou senha inválidos! ❌',
+      }}
+      
+    );
+
+    console.log(response);
+
+  }
 
   return (
     <Container>
@@ -50,7 +75,9 @@ export function Login() {
         <ImputContainer>
           <label htmlFor="email">Email:</label>
           <input type="email" {...register('email')} />
-          <Validacao red={errors?.email?.message !== undefined ? 'true' : undefined}>
+          <Validacao
+            red={errors?.email?.message !== undefined ? 'true' : undefined}
+          >
             {errors?.email?.message}
           </Validacao>
         </ImputContainer>
@@ -58,7 +85,9 @@ export function Login() {
         <ImputContainer>
           <label htmlFor="password">Senha:</label>
           <input type="password" {...register('password')} />
-          <Validacao red={errors?.password?.message !== undefined ? 'true' : undefined}>
+          <Validacao
+            red={errors?.password?.message !== undefined ? 'true' : undefined}
+          >
             {errors?.password?.message}
           </Validacao>
         </ImputContainer>
@@ -75,7 +104,7 @@ export function Login() {
       </Form>
       <div>
         <p>
-          Não tem uma conta? <a href="#">Cadastre-se</a>
+          Não tem uma conta? <Link to="/cadastro">Registre-se</Link>
         </p>
       </div>
       <Footer>

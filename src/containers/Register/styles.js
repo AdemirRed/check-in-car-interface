@@ -1,7 +1,6 @@
 import { Link as ReactLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -62,6 +61,14 @@ export const RememberMe = styled.div`
   }
 `;
 
+export const Link = styled(ReactLink)`
+  color: #007bff;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
 
 export const Footer = styled.footer`
   display: flex;
@@ -80,11 +87,8 @@ export const Footer = styled.footer`
   }
 `;
 
-export const Link = styled(ReactLink)`
-  color: #007bff;
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
+export const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 `;
