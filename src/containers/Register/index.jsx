@@ -15,7 +15,7 @@ import {
   ImputContainer,
   Link,
   P,
-  Title
+  Title,
 } from './styles';
 
 export function Register() {
@@ -60,8 +60,8 @@ export function Register() {
       ),
       {
         pending: 'Aguarde... ⏳',
-        success:{
-          render(){
+        success: {
+          render() {
             setTimeout(() => {
               window.location.href = '/login';
             }, 2000);
@@ -120,7 +120,9 @@ export function Register() {
           <input type="password" {...register('confirmar_senha')} />
           <Validacao
             red={
-              errors?.confirmar_senha?.message !== undefined ? 'true' : undefined
+              errors?.confirmar_senha?.message !== undefined
+                ? 'true'
+                : undefined
             }
           >
             {errors?.confirmar_senha?.message}

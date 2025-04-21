@@ -1,3 +1,4 @@
+ 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -6,12 +7,12 @@ import * as yup from 'yup';
 import { Button } from '../../components/Button';
 import { api } from '../../services/api';
 import {
-    Container,
-    FeedbackMessage,
-    Form,
-    InputContainer,
-    Title,
-    Validacao,
+  Container,
+  FeedbackMessage,
+  Form,
+  InputContainer,
+  Title,
+  Validacao,
 } from './styles';
 
 // Esquemas de validação com Yup
@@ -31,6 +32,8 @@ const resetSchema = yup.object({
 export function ForgotPassword() {
   const [step, setStep] = useState('request'); // 'request' ou 'reset'
   const [loading, setLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0); // Timer para reenviar código
+  const [emailForResend, setEmailForResend] = useState(''); // Armazena o e-mail para reenviar o código
 
   const {
     register,
@@ -40,25 +43,42 @@ export function ForgotPassword() {
     resolver: yupResolver(step === 'request' ? requestSchema : resetSchema),
   });
 
+  const startResendTimer = (additionalTime = 0) => {
+    setResendTimer((prev) => prev + 30 + additionalTime); // Incrementa o tempo base de 30 segundos com o adicional
+    const interval = setInterval(() => {
+      setResendTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const handleRequest = async (data) => {
     setLoading(true);
-    const promise = api.post('/esqueci-senha', { email: data.email });
-    toast.promise(promise, {
-      pending: 'Enviando solicitação...',
-      success: 'Se o e-mail existir, um código foi enviado! ☑️',
-      error: {
-        render({ data }) {
-          const { status } = data.response || {};
-          if (status === 401) return 'Usuário não encontrado. ❌';
-          if (status === 429) return 'Muitas tentativas. Tente novamente mais tarde. ❌';
-          if (status === 500) return 'Erro interno do servidor. Tente novamente mais tarde. ❌';
-          return 'Erro ao enviar solicitação! ❌';
-        },
-      },
-    });
     try {
-      await promise;
-      setStep('reset');
+      const response = await api.post('/verificar-email', { email: data.email });
+      if (response.status === 200) {
+        const promise = api.post('/esqueci-senha', { email: data.email });
+        toast.promise(promise, {
+          pending: 'Enviando solicitação...',
+          success: 'Código foi enviado! ☑️',
+          error: 'Erro ao enviar solicitação! ❌',
+        });
+        await promise;
+        setEmailForResend(data.email); // Salva o e-mail para uso no botão "Reenviar código"
+        setStep('reset');
+        startResendTimer();
+      }
+    } catch (error) {
+      const { status, data } = error.response || {};
+      if (status === 404) {
+        toast.error(data?.mensagem || 'E-mail não encontrado no sistema. ❌');
+      } else {
+        toast.error(data?.erro || 'Erro ao verificar e-mail. Tente novamente mais tarde. ❌');
+      }
     } finally {
       setLoading(false);
     }
@@ -74,20 +94,25 @@ export function ForgotPassword() {
     toast.promise(promise, {
       pending: 'Processando redefinição...',
       success: {
-        render() {
+        render({ data }) {
+          const token = data?.data?.token; // Supondo que o token venha na resposta
+          if (token) {
+            localStorage.setItem('authToken', token); // Salva o token no localStorage
+          }
           setTimeout(() => {
             window.location.href = '/Login';
           }, 2000);
           return 'Senha redefinida com sucesso! ☑️';
         },
-    },
-    //   success: 'Senha redefinida com sucesso! ☑️',
+      },
       error: {
         render({ data }) {
           const { status } = data.response || {};
           if (status === 401) return 'Código inválido ou expirado. ❌';
-          if (status === 429) return 'Muitas tentativas. Tente novamente mais tarde. ❌';
-          if (status === 500) return 'Erro interno do servidor. Tente novamente mais tarde. ❌';
+          if (status === 429)
+            return 'Muitas tentativas. Tente novamente mais tarde. ❌';
+          if (status === 500)
+            return 'Erro interno do servidor. Tente novamente mais tarde. ❌';
           return 'Erro ao redefinir senha! ❌';
         },
       },
@@ -98,11 +123,34 @@ export function ForgotPassword() {
       setLoading(false);
     }
   };
+  const handleResendCode = async () => {
+    setLoading(true);
+    try {
+      const promise = api.post('/esqueci-senha', { email: emailForResend });
+      toast.promise(promise, {
+        pending: 'Reenviando código...',
+        success: 'Código reenviado com sucesso! ☑️',
+        error: 'Erro ao reenviar código! ❌',
+      });
+      await promise;
+      startResendTimer(15); // Adiciona 15 segundos extras ao timer
+    } catch {
+      toast.error('Erro ao reenviar código. Tente novamente mais tarde. ❌');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Container>
-      <Title>{step === 'request' ? 'Esqueci minha senha' : 'Redefinir senha'}</Title>
-      <Form onSubmit={handleSubmit(step === 'request' ? handleRequest : handleReset)}>
+      <Title>
+        {step === 'request' ? 'Esqueci minha senha' : 'Redefinir senha'}
+      </Title>
+      <Form
+        onSubmit={handleSubmit(
+          step === 'request' ? handleRequest : handleReset
+        )}
+      >
         <InputContainer>
           <label htmlFor="email">Email:</label>
           <input
@@ -142,7 +190,9 @@ export function ForgotPassword() {
                 disabled={loading}
                 placeholder="Digite sua nova senha"
               />
-              <Validacao red={errors?.newPassword?.message ? 'true' : undefined}>
+              <Validacao
+                red={errors?.newPassword?.message ? 'true' : undefined}
+              >
                 {errors?.newPassword?.message}
               </Validacao>
             </InputContainer>
@@ -153,14 +203,25 @@ export function ForgotPassword() {
           {loading
             ? 'Processando...'
             : step === 'request'
-            ? 'Enviar código'
-            : 'Redefinir senha'}
+              ? 'Enviar código'
+              : 'Redefinir senha'}
         </Button>
       </Form>
 
       {step === 'reset' && (
         <FeedbackMessage>
-          <p>Não recebeu o código? Verifique sua caixa de spam ou tente novamente.</p>
+          <p>
+            Não recebeu o código? Verifique sua caixa de spam ou tente novamente.
+          </p>
+          <Button
+            type="button"
+            onClick={handleResendCode}
+            disabled={loading || resendTimer > 0}
+          >
+            {resendTimer > 0
+              ? `Reenviar código em ${resendTimer}s`
+              : 'Reenviar código'}
+          </Button>
         </FeedbackMessage>
       )}
     </Container>

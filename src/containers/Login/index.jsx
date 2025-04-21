@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
 import { Validacao } from '../../components/Validation';
@@ -19,6 +19,8 @@ import {
 } from './styles';
 
 export function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+
   const schema = yup
     .object({
       email: yup
@@ -65,7 +67,7 @@ export function Login() {
       localStorage.removeItem('rememberMe');
     }
 
-    const response = await toast.promise(
+    await toast.promise(
       api.post('/sessao', {
         email: data.email,
         senha_hash: data.password,
@@ -81,7 +83,7 @@ export function Login() {
               localStorage.setItem('authToken', token); // Salva o token no localStorage
             }
             setTimeout(() => {
-              window.location.href = '/home';
+              window.location.href = '/';
             }, 2000);
             return 'Login realizado com sucesso! ☑️';
           },
@@ -90,7 +92,6 @@ export function Login() {
       }
     );
 
-    console.log(response);
   };
 
   return (
@@ -110,7 +111,28 @@ export function Login() {
 
         <ImputContainer>
           <label htmlFor="password">Senha:</label>
-          <input id="password" type="password" {...register('password')} />
+          <div style={{ position: 'relative' }}>
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              {...register('password')}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {showPassword ? '👁️' : '🙈'}
+            </button>
+          </div>
           <Validacao
             red={errors?.password?.message !== undefined ? 'true' : undefined}
           >

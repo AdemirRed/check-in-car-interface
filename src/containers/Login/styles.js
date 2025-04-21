@@ -1,7 +1,6 @@
 import { Link as ReactLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -61,7 +60,6 @@ export const RememberMe = styled.div`
     margin-right: 5px;
   }
 `;
-
 
 export const Footer = styled.footer`
   display: flex;

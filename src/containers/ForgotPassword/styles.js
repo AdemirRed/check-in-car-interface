@@ -6,12 +6,12 @@ export const Container = styled.div`
   align-items: center;
   justify-content: center;
   padding: 20px;
+  color: rgb(30, 148, 138);
 `;
 
 export const Title = styled.h1`
   font-size: 24px;
   margin-bottom: 20px;
-  color: #333;
 `;
 
 export const Form = styled.form`
@@ -28,7 +28,6 @@ export const InputContainer = styled.div`
     display: block;
     margin-bottom: 5px;
     font-size: 14px;
-    color: #555;
   }
 
   input {
