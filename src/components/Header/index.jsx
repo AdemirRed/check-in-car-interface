@@ -38,7 +38,7 @@ const Header = () => {
     <HeaderContainer>
       <SiteName>Check-In Car</SiteName>
       <NavButtons>
-        <Button onClick={() => navigate('/')}>Home</Button>
+        {/* <Button onClick={() => navigate('/')}>Home</Button> */}
 
         <UserName onClick={toggleMenu}>
           <svg
@@ -65,6 +65,7 @@ const Header = () => {
         </UserName>
 
         <Button onClick={handleLogout}>Sair</Button>
+       
       </NavButtons>
     </HeaderContainer>
   );

@@ -17,25 +17,43 @@ export const HeaderContainer = styled.header`
     flex-direction: column;
     align-items: flex-start;
     padding: 10px;
+    
   }
 `;
 
 export const SiteName = styled.h1`
   font-size: 1.5rem;
   margin: 0;
+  background-color: #333;
 `;
 
 export const NavButtons = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center; /* Centraliza os botões */
   gap: 15px;
+  background-color: #333;
 
-  @media (max-width: 768px) { /* Ajusta os botões para telas menores */
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
+  Button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: row; /* Empilha os botões na vertical */
+    gap: 8px;
+    width: 100%;
+    font-size: 25px;
+    
+    Button {
+      
+      right: -25vw;
+      width: 20%; /* Reduz o tamanho dos botões */
+      max-width: 200px;
+    }
   }
 `;
+
 
 export const Button = styled.button`
   padding: 6px 10px; /* Botões menores */
@@ -57,6 +75,7 @@ export const UserName = styled.div`
   display: flex;
   align-items: center;
   gap: 8px; /* Espaçamento entre o nome e o ícone */
+  background-color: #333;
 `;
 
 export const DropdownMenu = styled.div`
