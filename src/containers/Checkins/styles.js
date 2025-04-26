@@ -38,3 +38,10 @@ export const NoCheckinsMessage = styled.p`
   color: #999;
   text-align: center;
 `;
+
+export const SvgIcon = styled.svg`
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  fill: currentColor;
+`;

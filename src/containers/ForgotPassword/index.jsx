@@ -1,4 +1,3 @@
- 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -6,6 +5,7 @@ import { toast } from 'react-toastify';
 import * as yup from 'yup';
 import { Button } from '../../components/Button';
 import { api } from '../../services/api';
+import { Eye, EyeOff, Mail } from 'lucide-react'; // Adicionado Eye, EyeOff e Mail
 import {
   Container,
   FeedbackMessage,
@@ -17,16 +17,16 @@ import {
 
 // Esquemas de validação com Yup
 const requestSchema = yup.object({
-  email: yup.string().email('Email inválido').required('Email é obrigatório'),
+  email: yup.string().email('📧 Email inválido').required('⚠️ Email é obrigatório'),
 });
 
 const resetSchema = yup.object({
-  email: yup.string().email('Email inválido').required('Email é obrigatório'),
-  code: yup.string().required('Código é obrigatório'),
+  email: yup.string().email('📧 Email inválido').required('⚠️ Email é obrigatório'),
+  code: yup.string().required('⚠️ Código é obrigatório'),
   newPassword: yup
     .string()
-    .required('Nova senha é obrigatória')
-    .min(6, 'Senha deve ter pelo menos 6 caracteres'),
+    .required('⚠️ Nova senha é obrigatória')
+    .min(6, '🔒 Senha deve ter pelo menos 6 caracteres'),
 });
 
 export function ForgotPassword() {
@@ -34,6 +34,7 @@ export function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0); // Timer para reenviar código
   const [emailForResend, setEmailForResend] = useState(''); // Armazena o e-mail para reenviar o código
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   const {
     register,
@@ -63,9 +64,9 @@ export function ForgotPassword() {
       if (response.status === 200) {
         const promise = api.post('/esqueci-senha', { email: data.email });
         toast.promise(promise, {
-          pending: 'Enviando solicitação...',
-          success: 'Código foi enviado! ☑️',
-          error: 'Erro ao enviar solicitação! ❌',
+          pending: '📤 Enviando solicitação...',
+          success: '✅ Código foi enviado! ☑️',
+          error: '❌ Erro ao enviar solicitação!',
         });
         await promise;
         setEmailForResend(data.email); // Salva o e-mail para uso no botão "Reenviar código"
@@ -75,9 +76,9 @@ export function ForgotPassword() {
     } catch (error) {
       const { status, data } = error.response || {};
       if (status === 404) {
-        toast.error(data?.mensagem || 'E-mail não encontrado no sistema. ❌');
+        toast.error(data?.mensagem || '❌ E-mail não encontrado no sistema.');
       } else {
-        toast.error(data?.erro || 'Erro ao verificar e-mail. Tente novamente mais tarde. ❌');
+        toast.error(data?.erro || '❌ Erro ao verificar e-mail. Tente novamente mais tarde.');
       }
     } finally {
       setLoading(false);
@@ -92,7 +93,7 @@ export function ForgotPassword() {
       novaSenha: data.newPassword,
     });
     toast.promise(promise, {
-      pending: 'Processando redefinição...',
+      pending: '🔄 Processando redefinição...',
       success: {
         render({ data }) {
           const token = data?.data?.token; // Supondo que o token venha na resposta
@@ -102,18 +103,18 @@ export function ForgotPassword() {
           setTimeout(() => {
             window.location.href = '/Login';
           }, 2000);
-          return 'Senha redefinida com sucesso! ☑️';
+          return '✅ Senha redefinida com sucesso! ☑️';
         },
       },
       error: {
         render({ data }) {
           const { status } = data.response || {};
-          if (status === 401) return 'Código inválido ou expirado. ❌';
+          if (status === 401) return '❌ Código inválido ou expirado.';
           if (status === 429)
-            return 'Muitas tentativas. Tente novamente mais tarde. ❌';
+            return '⚠️ Muitas tentativas. Tente novamente mais tarde.';
           if (status === 500)
-            return 'Erro interno do servidor. Tente novamente mais tarde. ❌';
-          return 'Erro ao redefinir senha! ❌';
+            return '❌ Erro interno do servidor. Tente novamente mais tarde.';
+          return '❌ Erro ao redefinir senha!';
         },
       },
     });
@@ -128,14 +129,14 @@ export function ForgotPassword() {
     try {
       const promise = api.post('/esqueci-senha', { email: emailForResend });
       toast.promise(promise, {
-        pending: 'Reenviando código...',
-        success: 'Código reenviado com sucesso! ☑️',
-        error: 'Erro ao reenviar código! ❌',
+        pending: '📤 Reenviando código...',
+        success: '✅ Código reenviado com sucesso! ☑️',
+        error: '❌ Erro ao reenviar código!',
       });
       await promise;
       startResendTimer(15); // Adiciona 15 segundos extras ao timer
     } catch {
-      toast.error('Erro ao reenviar código. Tente novamente mais tarde. ❌');
+      toast.error('❌ Erro ao reenviar código. Tente novamente mais tarde.');
     } finally {
       setLoading(false);
     }
@@ -153,13 +154,17 @@ export function ForgotPassword() {
       >
         <InputContainer>
           <label htmlFor="email">Email:</label>
-          <input
-            id="email"
-            type="email"
-            {...register('email')}
-            disabled={loading}
-            placeholder="Digite seu e-mail"
-          />
+          <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+            <Mail size={20} style={{ position: 'absolute', left: '10px', color: '#666' }} />
+            <input
+              id="email"
+              type="email"
+              {...register('email')}
+              disabled={loading}
+              placeholder="Digite seu e-mail"
+              style={{ paddingLeft: '35px' }} // Adicionado padding para acomodar o ícone
+            />
+          </div>
           <Validacao red={errors?.email?.message ? 'true' : undefined}>
             {errors?.email?.message}
           </Validacao>
@@ -183,13 +188,30 @@ export function ForgotPassword() {
 
             <InputContainer>
               <label htmlFor="newPassword">Nova senha:</label>
-              <input
-                id="newPassword"
-                type="password"
-                {...register('newPassword')}
-                disabled={loading}
-                placeholder="Digite sua nova senha"
-              />
+              <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                <input
+                  id="newPassword"
+                  type={showNewPassword ? 'text' : 'password'}
+                  {...register('newPassword')}
+                  disabled={loading}
+                  placeholder="Digite sua nova senha"
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 0,
+                  }}
+                >
+                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
               <Validacao
                 red={errors?.newPassword?.message ? 'true' : undefined}
               >

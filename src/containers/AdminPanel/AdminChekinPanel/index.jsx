@@ -2,6 +2,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { FaCar, FaClipboardList, FaMapMarkerAlt, FaStickyNote, FaUser } from 'react-icons/fa'; // Importação dos ícones
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import Header from '../../../components/Header';
@@ -215,7 +216,10 @@ export function AdminPanel() {
           marcados com * são obrigatórios.
         </Info>
         <DadosBasicos>
-          <Label htmlFor="usuario_id">Usuário Responsável *</Label>
+          <Label htmlFor="usuario_id"> 
+            <FaUser /> <></>
+            Usuário Responsável *
+          </Label>
           <InputContainer>
             
             <Select
@@ -232,7 +236,10 @@ export function AdminPanel() {
             </Select>
           </InputContainer>
           {errors.usuario_id && <p>{errors.usuario_id.message}</p>}
-          <Label htmlFor="veiculo_id">Veículo *</Label>
+          <Label htmlFor="veiculo_id">
+            <FaCar /> <></>
+            Veículo *
+          </Label>
           <InputContainer>
             <Select
               id="veiculo_id"
@@ -267,7 +274,10 @@ export function AdminPanel() {
           )}
         </DadosBasicos>
         <InfoViagem>
-          <Label htmlFor="destino">Destino</Label>
+          <Label htmlFor="destino">
+            <FaMapMarkerAlt /> <></>
+            Destino
+          </Label>
           <InputContainer>
            
             <Input
@@ -279,7 +289,10 @@ export function AdminPanel() {
               hasError={!!errors.destino}
             />
           </InputContainer>
-          <Label htmlFor="finalidade">Finalidade da Saída</Label>
+          <Label htmlFor="finalidade">
+            <FaClipboardList /> <></>
+            Finalidade da Saída
+          </Label>
           <InputContainer>
            
             <Input
@@ -289,7 +302,10 @@ export function AdminPanel() {
               {...register('finalidade')}
             />
           </InputContainer>
-          <Label htmlFor="observacoes">Observações</Label>
+          <Label htmlFor="observacoes">
+            <FaStickyNote /> <></>
+            Observações
+          </Label>
           <InputContainer>
            
             <Input

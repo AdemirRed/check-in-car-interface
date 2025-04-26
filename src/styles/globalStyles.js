@@ -12,7 +12,8 @@ const GlobalStyles = createGlobalStyle`
   outline: none;
   text-decoration: none;
   color: rgb(30, 148, 138);
-  background-color: #3b3b3b
+  background-color: #3b3b3b;
+  
   }
   a{
     color: #007bff;

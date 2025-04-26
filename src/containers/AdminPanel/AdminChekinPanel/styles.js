@@ -47,7 +47,7 @@ export const Form = styled.form`
 `;
 
 export const Info = styled.div`
-  background-color: #f0f9ff;
+  background-color: #3b3b3b;
   border: 1px solid #bae6fd;
   border-radius: 6px;
   padding: 1rem;
@@ -125,6 +125,7 @@ const baseFieldStyles = css`
 
   &::placeholder {
     color: #aaa;
+    content: '🔍 Digite aqui...'; // Adicionado emoji no placeholder
   }
 `;
 

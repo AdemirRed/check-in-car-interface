@@ -1,6 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { FaCar, FaClipboardList, FaMapMarkerAlt, FaStickyNote } from 'react-icons/fa'; // Importação dos ícones
 import { useNavigate } from 'react-router-dom'; // Import para redirecionamento
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,7 +17,7 @@ import {
   InputContainer,
   Label,
   Select,
-  Title,
+  Title
 } from './styles';
 
 const formSchema = yup.object().shape({
@@ -195,10 +196,14 @@ export function UserCheckinPanel() {
         <Info>
           Nenhum veículo cadastrado. {isAdmin ? 'Por favor, cadastre um veículo.' : 'Entre em contato com um administrador para cadastrar veículos.'}
         </Info>
+        
       ) : (
         <Form onSubmit={handleSubmit(onSubmit)}>
           <InputContainer>
-            <Label htmlFor="veiculo_id">Veículo *</Label>
+          <Label htmlFor="veiculo_id">
+          <FaCar /> <></>
+               Veículo *
+            </Label>
             <Select
               id="veiculo_id"
               {...register('veiculo_id')}
@@ -230,7 +235,10 @@ export function UserCheckinPanel() {
           )}
 
           <InputContainer>
-            <Label htmlFor="destino">Destino</Label>
+            <Label htmlFor="destino">
+              <FaMapMarkerAlt /> <></>
+              Destino
+            </Label>
             <Input
               id="destino"
               type="text"
@@ -240,7 +248,10 @@ export function UserCheckinPanel() {
           </InputContainer>
 
           <InputContainer>
-            <Label htmlFor="finalidade">Finalidade da Saída</Label>
+            <Label htmlFor="finalidade">
+              <FaClipboardList /> <></>
+              Finalidade da Saída
+            </Label>
             <Input
               id="finalidade"
               type="text"
@@ -250,7 +261,10 @@ export function UserCheckinPanel() {
           </InputContainer>
 
           <InputContainer>
-            <Label htmlFor="observacoes">Observações</Label>
+            <Label htmlFor="observacoes">
+              <FaStickyNote /> <></>
+              Observações
+            </Label>
             <Input
               id="observacoes"
               type="text"

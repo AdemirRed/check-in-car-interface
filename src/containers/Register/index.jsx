@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react'; // Adicionado Eye e EyeOff
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
@@ -16,8 +17,12 @@ import {
   P,
   Title,
 } from './styles';
+import { useState } from 'react';
 
 export function Register() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const schema = yup
     .object({
       nome: yup.string().required('O nome é obrigatório'),
@@ -87,7 +92,10 @@ export function Register() {
       <Form onSubmit={handleSubmit(onSubmit)}>
         <ImputContainer>
           <label htmlFor="nome">Nome:</label>
-          <input type="text" {...register('nome')} />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <User style={{ marginRight: '8px' }} />
+            <input type="text" {...register('nome')} />
+          </div>
           <Validacao
             red={errors?.nome?.message !== undefined ? 'true' : undefined}
           >
@@ -97,7 +105,10 @@ export function Register() {
 
         <ImputContainer>
           <label htmlFor="email">Email:</label>
-          <input type="email" {...register('email')} />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Mail style={{ marginRight: '8px' }} />
+            <input type="email" {...register('email')} />
+          </div>
           <Validacao
             red={errors?.email?.message !== undefined ? 'true' : undefined}
           >
@@ -107,7 +118,28 @@ export function Register() {
 
         <ImputContainer>
           <label htmlFor="senha_hash">Senha:</label>
-          <input type="password" {...register('senha_hash')} />
+          <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+            <Lock style={{ marginRight: '8px' }} />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              {...register('senha_hash')}
+              style={{ flex: 1 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '10px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+              }}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
           <Validacao
             red={errors?.senha_hash?.message !== undefined ? 'true' : undefined}
           >
@@ -117,7 +149,29 @@ export function Register() {
 
         <ImputContainer>
           <label htmlFor="confirmar_senha">Confirmar Senha:</label>
-          <input type="password" {...register('confirmar_senha')} />
+          <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+            <Lock style={{ marginRight: '8px' }} />
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              {...register('confirmar_senha')}
+              style={{ flex: 1 }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={{
+                position: 'absolute',
+                right: '10px',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+              }}
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+          
           <Validacao
             red={
               errors?.confirmar_senha?.message !== undefined

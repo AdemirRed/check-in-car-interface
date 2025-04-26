@@ -1,3 +1,4 @@
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react'; // Adicionado Eye e EyeOff
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
@@ -101,7 +102,10 @@ export function Login() {
       <Form onSubmit={handleSubmit(onSubmit)}>
         <ImputContainer>
           <label htmlFor="email">Email:</label>
-          <input id="email" type="email" {...register('email')} />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Mail style={{ marginRight: '8px' }} />
+            <input id="email" type="email" {...register('email')} />
+          </div>
           <Validacao
             red={errors?.email?.message !== undefined ? 'true' : undefined}
           >
@@ -111,11 +115,13 @@ export function Login() {
 
         <ImputContainer>
           <label htmlFor="password">Senha:</label>
-          <div style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+            <Lock style={{ marginRight: '8px' }} />
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
               {...register('password')}
+              style={{ flex: 1 }}
             />
             <button
               type="button"
@@ -123,14 +129,13 @@ export function Login() {
               style={{
                 position: 'absolute',
                 right: '10px',
-                top: '50%',
-                transform: 'translateY(-50%)',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
+                padding: 0,
               }}
             >
-              {showPassword ? '👁️' : '🙈'}
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
           <Validacao

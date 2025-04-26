@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Container, CheckinCard, CheckinInfo, CheckinTitle, NoCheckinsMessage } from './styles';
+import React, { useEffect, useState } from 'react';
+import { CheckinCard, CheckinInfo, CheckinTitle, Container, NoCheckinsMessage, SvgIcon } from './styles';
 
 // ...existing code...
 
@@ -36,8 +36,20 @@ const Checkins = () => {
       {checkins.length > 0 ? (
         checkins.map((checkin) => (
           <CheckinCard key={checkin.usuario_id}>
-            <CheckinTitle>Veículo: {checkin.veiculo.modelo}</CheckinTitle>
-            <CheckinInfo>Destino: {checkin.destino || 'Não informado'}</CheckinInfo>
+            <CheckinTitle>
+              <SvgIcon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </SvgIcon>
+              Veículo: {checkin.veiculo.modelo}
+            </CheckinTitle>
+            <CheckinInfo>
+              <SvgIcon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </SvgIcon>
+              Destino: {checkin.destino || 'Não informado'}
+            </CheckinInfo>
             <CheckinInfo>Finalidade: {checkin.finalidade || 'Não informado'}</CheckinInfo>
             <CheckinInfo>Observações: {checkin.observacoes || 'Nenhuma'}</CheckinInfo>
             <CheckinInfo>Saída: {new Date(checkin.data_hora_saida).toLocaleString()}</CheckinInfo>

@@ -7,6 +7,7 @@ export const Container = styled.div`
   background-color: #3b3b3b;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
 `;
 
 export const Title = styled.h1`
@@ -16,6 +17,10 @@ export const Title = styled.h1`
 `;
 
 export const Info = styled.p`
+background-color: #3b3b3b;
+border: 1px solid #bae6fd;
+border-radius: 6px;
+padding: 10px;
   font-size: 14px;
   margin-bottom: 20px;
   text-align: center;
@@ -61,4 +66,12 @@ export const Button = styled.button`
     background-color: #ccc;
     cursor: not-allowed;
   }
+`;
+
+export const SvgIcon = styled.svg`
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  fill: currentColor;
+  background-color: #555;
 `;
