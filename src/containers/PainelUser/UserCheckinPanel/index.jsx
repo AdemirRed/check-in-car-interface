@@ -1,6 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom'; // Import para redirecionamento
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import * as yup from 'yup';
@@ -30,6 +31,8 @@ export function UserCheckinPanel() {
   const [loading, setLoading] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [isAdmin, setIsAdmin] = useState(false); // Estado para verificar se o usuário é admin
+  const [selectedVeiculo, setSelectedVeiculo] = useState(null); // Estado para armazenar o veículo selecionado
+  const navigate = useNavigate(); // Hook para redirecionamento
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -94,6 +97,18 @@ export function UserCheckinPanel() {
     fetchVeiculos();
   }, []);
 
+  const handleVeiculoChange = (event) => {
+    const veiculoId = event.target.value;
+    const veiculo = veiculos.find((v) => v.id === veiculoId);
+
+    if (veiculo?.status === 'inativo' || veiculo?.status === 'em manutenção') {
+      toast.error('Este veículo não está disponível para uso.');
+      setSelectedVeiculo(null);
+    } else {
+      setSelectedVeiculo(veiculo || null);
+    }
+  };
+
   const onSubmit = async (data) => {
     setLoading(true);
 
@@ -106,12 +121,32 @@ export function UserCheckinPanel() {
       const adjustedDateTime = new Date(
         localDateTime.getTime() - localDateTime.getTimezoneOffset() * 60000
       );
+      console.log(data.veiculo_id);console.log(data.veiculo_id);console.log(data.veiculo_id);
+      
 
+      // Atualiza o status do veículo para "inativo"
+      const updateResponse = await api.patch(
+        `/carros/${data.veiculo_id}`,
+        { status: 'inativo' },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (updateResponse.status !== 200) {
+        console.error('Erro ao atualizar status do veículo:', updateResponse);
+        throw new Error('Falha ao atualizar status do veículo');
+      }
+
+      // Registra o check-in somente após a atualização do veículo
       const response = await api.post(
         '/checkins',
         {
           ...data,
-          data_hora_saida: adjustedDateTime.toISOString(), // Usa o horário ajustado
+          data_hora_saida: adjustedDateTime.toISOString(),
           user_id: userId,
         },
         {
@@ -125,7 +160,14 @@ export function UserCheckinPanel() {
       if (response.status !== 201) throw new Error('Falha ao registrar check-in');
 
       toast.success('Check-in registrado com sucesso!');
+
+      // Atualiza a página e redireciona para a página de registros
+      setTimeout(() => {
+        window.location.reload(); // Atualiza a página
+        navigate('/check'); // Redireciona para a página de registros
+      }, 2000);
     } catch (err) {
+      console.error('Erro no processo de check-in:', err);
       const errorMessage =
         err.response?.data?.message || 'Ocorreu um erro ao registrar o check-in';
       toast.error(errorMessage);
@@ -157,16 +199,35 @@ export function UserCheckinPanel() {
         <Form onSubmit={handleSubmit(onSubmit)}>
           <InputContainer>
             <Label htmlFor="veiculo_id">Veículo *</Label>
-            <Select id="veiculo_id" {...register('veiculo_id')}>
+            <Select
+              id="veiculo_id"
+              {...register('veiculo_id')}
+              onChange={(e) => {
+                register('veiculo_id').onChange(e);
+                handleVeiculoChange(e);
+              }}
+            >
               <option value="">Selecione o veículo</option>
               {veiculosArray.map((veiculo) => (
-                <option key={veiculo.id} value={veiculo.id}>
-                  {veiculo.placa} - {veiculo.modelo} ({veiculo.cor})
+                <option
+                  key={veiculo.id}
+                  value={veiculo.id}
+                  disabled={veiculo.status === 'inativo' || veiculo.status === 'em manutenção'}
+                >
+                  {veiculo.placa} - {veiculo.modelo} ({veiculo.cor}) - {veiculo.status}
                 </option>
               ))}
             </Select>
             {errors.veiculo_id && <p>{errors.veiculo_id.message}</p>}
           </InputContainer>
+
+          {selectedVeiculo && (
+            <Info>
+              <p><strong>Placa:</strong> {selectedVeiculo.placa}</p>
+              <p><strong>Modelo:</strong> {selectedVeiculo.modelo}</p>
+              <p><strong>Cor:</strong> {selectedVeiculo.cor}</p>
+            </Info>
+          )}
 
           <InputContainer>
             <Label htmlFor="destino">Destino</Label>

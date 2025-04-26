@@ -1,12 +1,11 @@
 import * as yup from 'yup';
 
-import { toast } from 'react-toastify';
-import { Validacao } from '../../components/Validation';
-import { api } from '../../services/api';
-
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
 import { Button } from '../../components/Button';
+import { Validacao } from '../../components/Validation';
+import { api } from '../../services/api';
 import {
   ButtonContainer,
   Container,
@@ -82,6 +81,7 @@ export function Register() {
 
   return (
     <Container>
+      
       <Title>Crie sua conta</Title>
       <P>Preencha os campos abaixo para se registrar</P>
       <Form onSubmit={handleSubmit(onSubmit)}>

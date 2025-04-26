@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
+import Checkins from '../containers/Checkins';
 import { ForgotPassword } from '../containers/ForgotPassword';
 import Home from '../containers/Home';
 import { Login } from '../containers/Login';
@@ -21,4 +22,8 @@ export const router = createBrowserRouter([
     path: '/cadastro',
     element: <Register />,
   },
+  {
+    path: '/check',
+    element: <Checkins />,
+  }
 ]);

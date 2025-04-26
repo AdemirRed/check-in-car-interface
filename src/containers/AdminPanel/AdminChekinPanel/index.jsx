@@ -43,6 +43,7 @@ export function AdminPanel() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [selectedVeiculo, setSelectedVeiculo] = useState(null); // Estado para armazenar o veículo selecionado
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -111,6 +112,18 @@ export function AdminPanel() {
     fetchData();
   }, [navigate]);
 
+  const handleVeiculoChange = (event) => {
+    const veiculoId = event.target.value;
+    const veiculo = veiculos.find((v) => v.id === veiculoId);
+
+    if (veiculo?.status === 'inativo' || veiculo?.status === 'em manutenção') {
+      toast.error('Este veículo não está disponível para uso.');
+      setSelectedVeiculo(null);
+    } else {
+      setSelectedVeiculo(veiculo || null);
+    }
+  };
+
   const onSubmit = async (data) => {
     setLoading(true);
     setError('');
@@ -125,11 +138,29 @@ export function AdminPanel() {
         localDateTime.getTime() - localDateTime.getTimezoneOffset() * 60000
       );
 
+      // Atualiza o status do veículo para "inativo"
+      const updateResponse = await api.patch(
+        `/carros/${data.veiculo_id}`,
+        { status: 'inativo' },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (updateResponse.status !== 200) {
+        console.error('Erro ao atualizar status do veículo:', updateResponse);
+        throw new Error('Falha ao atualizar status do veículo');
+      }
+
+      // Registra o check-in somente após a atualização do veículo
       const response = await api.post(
         '/checkins',
         {
           ...data,
-          data_hora_saida: adjustedDateTime.toISOString(), // Usa o horário ajustado
+          data_hora_saida: adjustedDateTime.toISOString(),
           user_id: data.usuario_id,
         },
         {
@@ -140,12 +171,18 @@ export function AdminPanel() {
         }
       );
 
-      if (response.status !== 201)
-        throw new Error('Falha ao registrar check-in');
+      if (response.status !== 201) throw new Error('Falha ao registrar check-in');
 
       setSuccess(true);
       toast.success('Check-in registrado com sucesso!');
+
+      // Atualiza a página e redireciona para a página de registros
+      setTimeout(() => {
+        window.location.reload(); // Atualiza a página
+        navigate('/check'); // Redireciona para a página de registros
+      }, 2000);
     } catch (err) {
+      console.error('Erro no processo de check-in:', err);
       const errorMessage =
         err.response?.data?.message || 'Ocorreu um erro ao registrar o check-in';
       setError(errorMessage);
@@ -202,16 +239,32 @@ export function AdminPanel() {
               name="veiculo_id"
               {...register('veiculo_id')}
               hasError={!!errors.veiculo_id}
+              onChange={(e) => {
+                register('veiculo_id').onChange(e);
+                handleVeiculoChange(e);
+              }}
             >
               <option value="">Selecione o veículo</option>
-              {Array.isArray(veiculos) && veiculos.map((veiculo) => (
-                <option key={veiculo.id} value={veiculo.id}>
-                  {veiculo.placa} - {veiculo.modelo} ({veiculo.cor})
-                </option>
-              ))}
+              {Array.isArray(veiculos) &&
+                veiculos.map((veiculo) => (
+                  <option
+                    key={veiculo.id}
+                    value={veiculo.id}
+                    disabled={veiculo.status === 'inativo' || veiculo.status === 'em manutenção'}
+                  >
+                    {veiculo.placa} - {veiculo.modelo} ({veiculo.cor}) - {veiculo.status}
+                  </option>
+                ))}
             </Select>
           </InputContainer>
           {errors.veiculo_id && <p>{errors.veiculo_id.message}</p>}
+          {selectedVeiculo && (
+            <Info>
+              <p><strong>Placa:</strong> {selectedVeiculo.placa}</p>
+              <p><strong>Modelo:</strong> {selectedVeiculo.modelo}</p>
+              <p><strong>Cor:</strong> {selectedVeiculo.cor}</p>
+            </Info>
+          )}
         </DadosBasicos>
         <InfoViagem>
           <Label htmlFor="destino">Destino</Label>
